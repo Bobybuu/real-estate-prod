@@ -65,11 +65,10 @@ const HeroSection = () => {
       >
         <div className="max-w-4xl mx-auto px-16 sm:px-12">
           <h1 className="text-5xl font-bold text-white mb-4">
-            Start your journey to finding the perfect place to call home
+            Your Trusted Real Estate Partner in Kenya
           </h1>
           <p className="text-xl text-white mb-8">
-            Explore our wide range of rental properties tailored to fit your
-            lifestyle and needs!
+            Buy, Sell, or Manage Apartments, Homes and Land  with Ease.
           </p>
 
           <div className="flex justify-center">

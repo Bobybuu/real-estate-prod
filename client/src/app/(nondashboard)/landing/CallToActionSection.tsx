@@ -10,45 +10,41 @@ const CallToActionSection = () => {
     <div className="relative py-24">
       <Image
         src="/landing-call-to-action.jpg"
-        alt="Rentiful Search Section Background"
+        alt="Real Estate Call to Action Background"
         fill
         className="object-cover object-center"
       />
-      <div className="absolute inset-0 bg-black bg-opacity-60"></div>
+      <div className="absolute inset-0 bg-black bg-opacity-70"></div>
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         transition={{ duration: 0.5 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        className="relative max-w-4xl xl:max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 xl:px-16 py-12"
+        className="relative max-w-4xl xl:max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 xl:px-16 py-12 text-center"
       >
-        <div className="flex flex-col md:flex-row justify-between items-center">
-          <div className="mb-6 md:mb-0 md:mr-10">
-            <h2 className="text-2xl font-bold text-white">
-              Find Your Dream Rental Property
-            </h2>
-          </div>
-          <div>
-            <p className="text-white mb-3">
-              Discover a wide range of rental properties in your desired
-              location.
-            </p>
-            <div className="flex justify-center md:justify-start gap-4">
-              <button
-                onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-                className="inline-block text-primary-700 bg-white rounded-lg px-6 py-3 font-semibold hover:bg-primary-500 hover:text-primary-50"
-              >
-                Search
-              </button>
-              <Link
-                href="/signup"
-                className="inline-block text-white bg-secondary-500 rounded-lg px-6 py-3 font-semibold hover:bg-secondary-600"
-                scroll={false}
-              >
-                Sign Up
-              </Link>
-            </div>
-          </div>
+        <h2 className="text-3xl md:text-4xl font-bold text-white leading-snug">
+          Looking to Rent, Buy or Sell Property?
+        </h2>
+        <p className="mt-4 text-lg text-gray-200 max-w-3xl mx-auto">
+          Whether you’re searching for your dream home, a piece of land, or you’re 
+          an agent, landlord or broker wanting to list properties, we’ve got you covered.  
+          Join our platform today to rent, buy or sell property with ease.
+        </p>
+
+        <div className="mt-8 flex flex-col md:flex-row justify-center gap-4">
+          <Link
+            href="/signup"
+            className="inline-block bg-secondary-500 text-white rounded-lg px-8 py-3 font-semibold hover:bg-secondary-600 transition"
+          >
+            I Want to Rent or Buy
+          </Link>
+          <Link
+            href="/signup"
+            className="inline-block bg-white text-primary-700 rounded-lg px-8 py-3 font-semibold hover:bg-primary-500 hover:text-white transition"
+          >
+            I’m an Agent / Landlord – List Property
+          </Link>
         </div>
       </motion.div>
     </div>

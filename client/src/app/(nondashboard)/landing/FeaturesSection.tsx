@@ -39,29 +39,30 @@ const FeaturesSection = () => {
           Quickly find the home you want using our effective search filters!
         </motion.h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12 xl:gap-16">
-          {[0, 1, 2].map((index) => (
-            <motion.div key={index} variants={itemVariants}>
-              <FeatureCard
-                imageSrc={`/landing-search${3 - index}.png`}
-                title={
-                  [
-                    "Trustworthy and Verified Listings",
-                    "Browse Rental Listings with Ease",
-                    "Simplify Your Rental Search with Advanced",
-                  ][index]
-                }
-                description={
-                  [
-                    "Discover the best rental options with user reviews and ratings.",
-                    "Get access to user reviews and ratings for a better understanding of rental options.",
-                    "Find trustworthy and verified rental listings to ensure a hassle-free experience.",
-                  ][index]
-                }
-                linkText={["Explore", "Search", "Discover"][index]}
-                linkHref={["/explore", "/search", "/discover"][index]}
-              />
-            </motion.div>
-          ))}
+{[0, 1, 2].map((index) => (
+  <motion.div key={index} variants={itemVariants}>
+    <FeatureCard
+      imageSrc={`/landing-search${3 - index}.png`}
+      title={
+        [
+          "Buy or Sell Property",
+          "Find Homes to Rent",
+          "Property Management",
+        ][index]
+      }
+      description={
+        [
+          "Easily buy or sell land, homes, or apartments with trusted guidance.",
+          "Browse verified rentals and discover your ideal home fast.",
+          "Let us manage your property, handle tenants, and simplify ownership.",
+        ][index]
+      }
+      linkText={["Learn More", "View Rentals", "Get Started"][index]}
+      linkHref={["/buy-sell", "/rentals", "/management"][index]}
+    />
+  </motion.div>
+))}
+
         </div>
       </div>
     </motion.div>
