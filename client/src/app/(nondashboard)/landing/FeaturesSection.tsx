@@ -58,7 +58,7 @@ const FeaturesSection = () => {
         ][index]
       }
       linkText={["Learn More", "View Rentals", "Get Started"][index]}
-      linkHref={["/buy-sell", "/rentals", "/management"][index]}
+      linkHref={["/properties", "/properties", "/properties"][index]}
     />
   </motion.div>
 ))}

@@ -51,7 +51,7 @@ const HeroSection = () => {
     <div className="relative h-screen">
       <Image
         src="/landing-splash.jpg"
-        alt="Rentiful Rental Platform Hero Section"
+        alt="pristineprimer Rental Platform Hero Section"
         fill
         className="object-cover object-center"
         priority
@@ -76,7 +76,7 @@ const HeroSection = () => {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by city, neighborhood or address"
+              placeholder="Search by location, property or address"
               className="w-full max-w-lg rounded-none rounded-l-xl border-none bg-white h-12"
             />
             <Button

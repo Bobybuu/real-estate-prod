@@ -6,7 +6,7 @@ import {
   faFacebook,
   faInstagram,
   faTwitter,
-  faLinkedin,
+  faTiktok,
   faYoutube,
 } from "@fortawesome/free-brands-svg-icons";
 
@@ -28,8 +28,8 @@ const FooterSection = () => {
             </p>
             <p>
               <strong>Phone:</strong>{" "}
-              <a href="tel:+254700000000" className="hover:underline">
-                +254 700 000 000
+              <a href="tel:+254729407573" className="hover:underline">
+                +254 729407573
               </a>
             </p>
             <p>
@@ -97,17 +97,20 @@ const FooterSection = () => {
             </button>
           </form>
           <div className="flex space-x-4 mt-6">
-            <a href="#" aria-label="Facebook" className="hover:text-primary-600">
+            <a href="https://www.facebook.com/profile.php?id=61578142085551" aria-label="Facebook" className="hover:text-primary-600">
               <FontAwesomeIcon icon={faFacebook} className="h-6 w-6" />
             </a>
-            <a href="#" aria-label="Instagram" className="hover:text-primary-600">
+            <a href="https://www.instagram.com/pristineprimer.re?igsh=ZmFna3p4d2RuZXF4" aria-label="Instagram" className="hover:text-primary-600">
               <FontAwesomeIcon icon={faInstagram} className="h-6 w-6" />
             </a>
-            <a href="#" aria-label="Twitter" className="hover:text-primary-600">
+            <a href="https://x.com/PristinePrimer?t=uwzZe-a7N6zVTlqW3R5FTQ&s=09" aria-label="Twitter" className="hover:text-primary-600">
               <FontAwesomeIcon icon={faTwitter} className="h-6 w-6" />
             </a>
-            <a href="#" aria-label="LinkedIn" className="hover:text-primary-600">
-              <FontAwesomeIcon icon={faLinkedin} className="h-6 w-6" />
+            <a href="https://youtube.com/@pristineprimerre?si=ch4ipezfZwAOaK1z" aria-label="YouTube" className="hover:text-primary-600">
+              <FontAwesomeIcon icon={faYoutube} className="h-6 w-6" />
+            </a>
+            <a href="https://www.tiktok.com/@pristineprimer.re?_t=ZM-8zkSaPFTYBU&_r=1" aria-label="TikTok" className="hover:text-primary-600">
+              <FontAwesomeIcon icon={faTiktok} className="h-6 w-6" />
             </a>
           </div>
         </div>
