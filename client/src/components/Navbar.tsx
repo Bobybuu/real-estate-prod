@@ -172,7 +172,7 @@ const Navbar = () => {
               <Link href="/signup">
                 <Button
                   variant="secondary"
-                  className="text-white bg-secondary-600 hover:bg-white hover:text-primary-700 rounded-lg"
+                  className="text-white bg-secondary-500 hover:bg-white hover:text-primary-700 rounded-lg"
                 >
                   Sign Up
                 </Button>
@@ -241,16 +241,7 @@ const Navbar = () => {
           <div className="mt-4 flex flex-col gap-2">
             {authUser ? (
               <>
-                <div className="flex gap-4 justify-center py-2">
-                  <div className="relative">
-                    <MessageCircle className="w-6 h-6 cursor-pointer text-primary-200 hover:text-primary-400" />
-                    <span className="absolute top-0 right-0 w-2 h-2 bg-secondary-700 rounded-full"></span>
-                  </div>
-                  <div className="relative">
-                    <Bell className="w-6 h-6 cursor-pointer text-primary-200 hover:text-primary-400" />
-                    <span className="absolute top-0 right-0 w-2 h-2 bg-secondary-700 rounded-full"></span>
-                  </div>
-                </div>
+                
                 <Button
                   variant="secondary"
                   className="bg-secondary-600 hover:bg-white hover:text-primary-700"
