@@ -5,6 +5,7 @@ import { NAVBAR_HEIGHT } from "@/lib/constants";
 import { useGetAuthUserQuery } from "@/state/api";
 import { usePathname, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
+import Head from "next/head"; // <-- import Head
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const { data: authUser, isLoading: authLoading } = useGetAuthUserQuery();
@@ -30,9 +31,14 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div className="h-full w-full">
+      {/* ✅ Add meta inside Head */}
+      <Head>
+        <meta name="apple-mobile-web-app-title" content="pristine" />
+      </Head>
+
       <Navbar />
       <main
-        className={`h-full flex w-full flex-col`}
+        className="h-full flex w-full flex-col"
         style={{ paddingTop: `${NAVBAR_HEIGHT}px` }}
       >
         {children}
