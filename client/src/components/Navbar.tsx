@@ -47,15 +47,17 @@ const Navbar = () => {
             </div>
           )}
           
-          <Link href="/" className="flex items-center gap-2">
-            <Image
-              src="/pristineprimer-navbar-logo@2x.png"
-              alt="Logo"
-              width={1000}
-              height={40}
-              className="h-10 w-auto"
-            />
-          </Link>
+        <Link href="/" className="flex items-center gap-2">
+          <Image
+            src="/pristineprimer-navbar-logo@2x.png"
+            alt="Logo"
+            width={1000}
+            height={40}
+            className="h-10 w-auto"
+            priority
+          />
+        </Link>
+
 
           {isDashboardPage && authUser && (
             <Button

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
@@ -10,9 +10,7 @@ const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: {
-      staggerChildren: 0.2,
-    },
+    transition: { staggerChildren: 0.2 },
   },
 };
 
@@ -21,39 +19,30 @@ const itemVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
-// Demo property data (replace with your DB/API call)
-const properties = [
-  {
-    id: 1,
-    name: "Modern 3-Bed Apartment",
-    pricePerMonth: 80000,
-    beds: 3,
-    baths: 2,
-    location: "Nairobi, Kenya",
-    photoUrls: ["/landing-splash.jpg"],
-  },
-  {
-    id: 2,
-    name: "Prime Land Plot",
-    pricePerMonth: 4500000,
-    beds: 0,
-    baths: 0,
-    location: "Naivasha, Kenya",
-    photoUrls: ["/landing-splash.jpg"],
-  },
-  {
-    id: 3,
-    name: "Cozy Villa with Garden",
-    pricePerMonth: 120000,
-    beds: 4,
-    baths: 3,
-    location: "Mombasa, Kenya",
-    photoUrls: ["/landing-splash.jpg"],
-  },
-];
-
 const DiscoverSection = () => {
+  const [properties, setProperties] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<number | null>(null);
+
+  useEffect(() => {
+    const fetchProperties = async () => {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/properties?limit=3`
+        );
+        const data = await res.json();
+
+        // Adjust based on your API response structure
+        setProperties(data.properties || data || []);
+      } catch (error) {
+        console.error("Failed to fetch properties:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProperties();
+  }, []);
 
   return (
     <motion.div
@@ -75,21 +64,27 @@ const DiscoverSection = () => {
         </motion.div>
 
         {/* Property Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12 xl:gap-16">
-          {properties.map((property) => (
-            <motion.div key={property.id} variants={itemVariants}>
-              <PropertyCard
-                property={property}
-                isExpanded={expandedId === property.id}
-                onExpand={() =>
-                  setExpandedId(
-                    expandedId === property.id ? null : property.id
-                  )
-                }
-              />
-            </motion.div>
-          ))}
-        </div>
+        {loading ? (
+          <p className="text-center text-gray-500">Loading properties...</p>
+        ) : properties.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12 xl:gap-16">
+            {properties.map((property) => (
+              <motion.div key={property.id} variants={itemVariants}>
+                <PropertyCard
+                  property={property}
+                  isExpanded={expandedId === property.id}
+                  onExpand={() =>
+                    setExpandedId(
+                      expandedId === property.id ? null : property.id
+                    )
+                  }
+                />
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-center text-gray-500">No properties found.</p>
+        )}
 
         {/* Explore More */}
         <div className="text-center mt-12">
@@ -118,7 +113,7 @@ const PropertyCard = ({
     {/* Image */}
     <div className="relative h-56 w-full">
       <Image
-        src={property.photoUrls[0]}
+        src={property.photoUrls?.[0] || "/placeholder.jpg"}
         alt={property.name}
         fill
         className="object-cover"
@@ -129,7 +124,7 @@ const PropertyCard = ({
     <div className="p-4">
       <h3 className="text-lg font-semibold">{property.name}</h3>
       <p className="text-primary-700 font-bold">
-        KES {property.pricePerMonth.toLocaleString()}
+        KES {property.pricePerMonth?.toLocaleString() ?? "N/A"}
       </p>
       <p className="text-gray-500 text-sm">
         {property.beds} Beds • {property.baths} Baths • {property.location}
@@ -138,10 +133,7 @@ const PropertyCard = ({
       {/* Expanded content */}
       {isExpanded && (
         <div className="mt-3 text-sm text-gray-600">
-          <p>
-            {/* Add more property details here */}
-            This property offers great amenities and a prime location.
-          </p>
+          <p>{property.description || "This property offers great amenities and a prime location."}</p>
         </div>
       )}
 
