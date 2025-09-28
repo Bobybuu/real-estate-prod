@@ -31,6 +31,9 @@ app.use(
     origin: [
       // put your real Amplify frontend domain here:
       "https://master.d3iojqgbl70gnb.amplifyapp.com",
+      "https://pristineprimier.co.ke",
+      "http://localhost:3000",
+      "https://www.pristineprimier.com/",
       // you can add more allowed origins if needed
     ],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
