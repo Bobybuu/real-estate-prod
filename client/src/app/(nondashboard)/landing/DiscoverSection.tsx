@@ -27,13 +27,18 @@ const DiscoverSection = () => {
   useEffect(() => {
     const fetchProperties = async () => {
       try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/properties?limit=3`
-        );
+        // Fetch ALL properties
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/properties`);
         const data = await res.json();
 
-        // Adjust based on your API response structure
-        setProperties(data.properties || data || []);
+        // The backend might return {properties: [...]}, or just [...]
+        const allProperties = data.properties || data || [];
+
+        // Randomize and pick 3
+        const shuffled = [...allProperties].sort(() => Math.random() - 0.5);
+        const randomThree = shuffled.slice(0, 3);
+
+        setProperties(randomThree);
       } catch (error) {
         console.error("Failed to fetch properties:", error);
       } finally {
@@ -68,7 +73,7 @@ const DiscoverSection = () => {
           <p className="text-center text-gray-500">Loading properties...</p>
         ) : properties.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12 xl:gap-16">
-            {properties.map((property) => (
+            {properties.map((property: any) => (
               <motion.div key={property.id} variants={itemVariants}>
                 <PropertyCard
                   property={property}
@@ -127,13 +132,17 @@ const PropertyCard = ({
         KES {property.pricePerMonth?.toLocaleString() ?? "N/A"}
       </p>
       <p className="text-gray-500 text-sm">
-        {property.beds} Beds • {property.baths} Baths • {property.location}
+        {property.beds} Beds • {property.baths} Baths •{" "}
+        {property.location?.city || property.location?.address || "Unknown"}
       </p>
 
       {/* Expanded content */}
       {isExpanded && (
         <div className="mt-3 text-sm text-gray-600">
-          <p>{property.description || "This property offers great amenities and a prime location."}</p>
+          <p>
+            {property.description ||
+              "This property offers great amenities and a prime location."}
+          </p>
         </div>
       )}
 
