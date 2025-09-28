@@ -3,7 +3,6 @@ import withPWA from "next-pwa";
 
 const baseConfig: NextConfig = {
   reactStrictMode: true,
-  swcMinify: true,
   images: {
     remotePatterns: [
       {
