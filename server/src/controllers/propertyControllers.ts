@@ -29,42 +29,46 @@ export const getProperties = async (req: Request, res: Response): Promise<void> 
       longitude,
     } = req.query;
 
-    const whereConditions: any[] = [];
+    // build SQL conditions as plain strings
+    const conditions: string[] = [];
 
     if (favoriteIds) {
-      const favoriteIdsArray = (favoriteIds as string).split(",").map(Number);
-      whereConditions.push(
-        prisma.$queryRaw`p.id IN (${prisma.$queryRaw`${favoriteIdsArray}`})`
-      );
+      const ids = (favoriteIds as string)
+        .split(",")
+        .map((id) => Number(id))
+        .filter((n) => !isNaN(n));
+      if (ids.length > 0) {
+        conditions.push(`p.id = ANY(ARRAY[${ids.join(",")}])`);
+      }
     }
 
-    if (priceMin) whereConditions.push(prisma.$queryRaw`p."pricePerMonth" >= ${Number(priceMin)}`);
-    if (priceMax) whereConditions.push(prisma.$queryRaw`p."pricePerMonth" <= ${Number(priceMax)}`);
-    if (beds && beds !== "any") whereConditions.push(prisma.$queryRaw`p.beds >= ${Number(beds)}`);
-    if (baths && baths !== "any") whereConditions.push(prisma.$queryRaw`p.baths >= ${Number(baths)}`);
-    if (squareFeetMin) whereConditions.push(prisma.$queryRaw`p."squareFeet" >= ${Number(squareFeetMin)}`);
-    if (squareFeetMax) whereConditions.push(prisma.$queryRaw`p."squareFeet" <= ${Number(squareFeetMax)}`);
+    if (priceMin) conditions.push(`p."pricePerMonth" >= ${Number(priceMin)}`);
+    if (priceMax) conditions.push(`p."pricePerMonth" <= ${Number(priceMax)}`);
+    if (beds && beds !== "any") conditions.push(`p.beds >= ${Number(beds)}`);
+    if (baths && baths !== "any") conditions.push(`p.baths >= ${Number(baths)}`);
+    if (squareFeetMin) conditions.push(`p."squareFeet" >= ${Number(squareFeetMin)}`);
+    if (squareFeetMax) conditions.push(`p."squareFeet" <= ${Number(squareFeetMax)}`);
 
     if (propertyType && propertyType !== "any") {
-      whereConditions.push(prisma.$queryRaw`p."propertyType" = ${propertyType}::"PropertyType"`);
+      conditions.push(`p."propertyType" = '${propertyType}'::"PropertyType"`);
     }
 
     if (amenities && amenities !== "any") {
-      const amenitiesArray = (amenities as string)
+      const arr = (amenities as string)
         .split(",")
-        .map((a) => a.trim())
-        .filter(Boolean);
-      whereConditions.push(prisma.$queryRaw`p.amenities @> ${amenitiesArray}`);
+        .map((a) => `'${a.trim()}'`)
+        .join(",");
+      conditions.push(`p.amenities @> ARRAY[${arr}]::"Amenity"[]`);
     }
 
     if (availableFrom && availableFrom !== "any") {
       const date = new Date(availableFrom as string);
       if (!isNaN(date.getTime())) {
-        whereConditions.push(prisma.$queryRaw`
+        conditions.push(`
           EXISTS (
-            SELECT 1 FROM "Lease" l 
-            WHERE l."propertyId" = p.id 
-            AND l."startDate" <= ${date.toISOString()}
+            SELECT 1 FROM "Lease" l2 
+            WHERE l2."propertyId" = p.id 
+            AND l2."startDate" <= '${date.toISOString()}'
           )
         `);
       }
@@ -73,10 +77,8 @@ export const getProperties = async (req: Request, res: Response): Promise<void> 
     if (latitude && longitude) {
       const lat = parseFloat(latitude as string);
       const lng = parseFloat(longitude as string);
-      const radiusInKm = 1000;
-
-      // Use geography for accurate meter-based distance
-      whereConditions.push(prisma.$queryRaw`
+      const radiusInKm = 1000; // adjust as needed
+      conditions.push(`
         ST_DWithin(
           l.coordinates::geography,
           ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)::geography,
@@ -85,7 +87,9 @@ export const getProperties = async (req: Request, res: Response): Promise<void> 
       `);
     }
 
-    const completeQuery = prisma.$queryRawUnsafe(`
+    const whereSQL = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+
+    const sql = `
       SELECT 
         p.*,
         json_build_object(
@@ -102,12 +106,13 @@ export const getProperties = async (req: Request, res: Response): Promise<void> 
         ) as location
       FROM "Property" p
       JOIN "Location" l ON p."locationId" = l.id
-      ${whereConditions.length > 0 ? `WHERE ${whereConditions.join(" AND ")}` : ""}
-    `);
+      ${whereSQL};
+    `;
 
-    const properties = await completeQuery;
+    const properties = await prisma.$queryRawUnsafe(sql);
     res.json(properties);
   } catch (error: any) {
+    console.error("Error retrieving properties:", error);
     res.status(500).json({ message: `Error retrieving properties: ${error.message}` });
   }
 };
@@ -180,7 +185,7 @@ export const createProperty = async (req: Request, res: Response): Promise<void>
           return uploadResult.Location;
         } catch (err) {
           console.error("S3 upload failed:", err);
-          return null; // return null if one fails, don’t crash entire request
+          return null; // skip failed uploads
         }
       })
     );
