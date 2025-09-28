@@ -166,29 +166,29 @@ export const createProperty = async (req: Request, res: Response): Promise<void>
     } = req.body;
 
     // Upload photos to S3 with manual URL building
-    const photoUrls = await Promise.all(
-      files.map(async (file) => {
-        try {
-          const key = `properties/${Date.now()}-${file.originalname}`;
-          const uploadParams = {
-            Bucket: process.env.S3_BUCKET_NAME!,
-            Key: key,
-            Body: file.buffer,
-            ContentType: file.mimetype,
-          };
+    // Upload photos to S3 with manual URL building
+const uploadedUrls = await Promise.all(
+  files.map(async (file) => {
+    try {
+      const key = `properties/${Date.now()}-${file.originalname}`;
+      const uploadParams = {
+        Bucket: process.env.S3_BUCKET_NAME!,
+        Key: key,
+        Body: file.buffer,
+        ContentType: file.mimetype,
+      };
+      await new Upload({ client: s3Client, params: uploadParams }).done();
+      return `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
+    } catch (err) {
+      console.error("S3 upload failed:", err);
+      return null;
+    }
+  })
+);
 
-          await new Upload({
-            client: s3Client,
-            params: uploadParams,
-          }).done();
-
-          return `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
-        } catch (err) {
-          console.error("S3 upload failed:", err);
-          return null;
-        }
-      })
-    );
+const photoUrls: string[] = uploadedUrls.filter(
+  (url): url is string => typeof url === "string"
+);
 
     // Geocode address
     let longitude = 0;
