@@ -29,7 +29,6 @@ export const getProperties = async (req: Request, res: Response): Promise<void> 
       longitude,
     } = req.query;
 
-    // build SQL conditions as plain strings
     const conditions: string[] = [];
 
     if (favoriteIds) {
@@ -77,7 +76,7 @@ export const getProperties = async (req: Request, res: Response): Promise<void> 
     if (latitude && longitude) {
       const lat = parseFloat(latitude as string);
       const lng = parseFloat(longitude as string);
-      const radiusInKm = 1000; // adjust as needed
+      const radiusInKm = 1000;
       conditions.push(`
         ST_DWithin(
           l.coordinates::geography,
@@ -166,26 +165,27 @@ export const createProperty = async (req: Request, res: Response): Promise<void>
       ...propertyData
     } = req.body;
 
-    // Upload photos to S3
+    // Upload photos to S3 with manual URL building
     const photoUrls = await Promise.all(
       files.map(async (file) => {
         try {
+          const key = `properties/${Date.now()}-${file.originalname}`;
           const uploadParams = {
             Bucket: process.env.S3_BUCKET_NAME!,
-            Key: `properties/${Date.now()}-${file.originalname}`,
+            Key: key,
             Body: file.buffer,
             ContentType: file.mimetype,
           };
 
-          const uploadResult = await new Upload({
+          await new Upload({
             client: s3Client,
             params: uploadParams,
           }).done();
 
-          return uploadResult.Location;
+          return `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
         } catch (err) {
           console.error("S3 upload failed:", err);
-          return null; // skip failed uploads
+          return null;
         }
       })
     );
@@ -254,3 +254,6 @@ export const createProperty = async (req: Request, res: Response): Promise<void>
     res.status(500).json({ message: `Error creating property: ${err.message}` });
   }
 };
+
+
+
