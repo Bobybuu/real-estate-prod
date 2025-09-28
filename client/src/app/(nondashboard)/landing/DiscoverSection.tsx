@@ -94,7 +94,7 @@ const DiscoverSection = () => {
         {/* Explore More */}
         <div className="text-center mt-12">
           <Link
-            href="/properties"
+            href="/search"
             className="inline-block px-6 py-3 bg-primary-700 text-white rounded hover:bg-primary-800"
           >
             Explore More Properties
