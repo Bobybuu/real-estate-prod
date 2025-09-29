@@ -100,11 +100,11 @@ const PropertyTenants = () => {
                     <TableCell>
                       <div className="flex items-center space-x-3">
                         <Image
-                          src="/landing-i1.png"
-                          alt={lease.tenant.name}
-                          width={40}
-                          height={40}
-                          className="rounded-full"
+                        src={property?.photoUrls?.[0] || "/fallback.jpg"}
+                        alt={property?.name || "Property photo"}
+                        width={300}
+                        height={200}
+                        className="rounded-lg object-cover"
                         />
                         <div>
                           <div className="font-semibold">

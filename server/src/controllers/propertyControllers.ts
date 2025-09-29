@@ -1,15 +1,10 @@
 import { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
 import { wktToGeoJSON } from "@terraformer/wkt";
-import { S3Client } from "@aws-sdk/client-s3";
-import { Upload } from "@aws-sdk/lib-storage";
 import axios from "axios";
+import { uploadToS3 } from "../utils/s3"; // ✅ use only this
 
 const prisma = new PrismaClient();
-
-const s3Client = new S3Client({
-  region: process.env.AWS_REGION,
-});
 
 // -------------------- GET ALL PROPERTIES --------------------
 export const getProperties = async (req: Request, res: Response): Promise<void> => {
@@ -165,32 +160,23 @@ export const createProperty = async (req: Request, res: Response): Promise<void>
       ...propertyData
     } = req.body;
 
-    // Upload photos to S3 with manual URL building
-    // Upload photos to S3 with manual URL building
-const uploadedUrls = await Promise.all(
-  files.map(async (file) => {
-    try {
-      const key = `properties/${Date.now()}-${file.originalname}`;
-      const uploadParams = {
-        Bucket: process.env.S3_BUCKET_NAME!,
-        Key: key,
-        Body: file.buffer,
-        ContentType: file.mimetype,
-      };
-      await new Upload({ client: s3Client, params: uploadParams }).done();
-      return `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
-    } catch (err) {
-      console.error("S3 upload failed:", err);
-      return null;
-    }
-  })
-);
+    // ✅ Upload photos to S3
+    
 
-const photoUrls: string[] = uploadedUrls.filter(
-  (url): url is string => typeof url === "string"
-);
+    const uploadedUrls = await Promise.all(
+      files.map(async (file) => {
+        try {
+          return await uploadToS3(file);
+        } catch (err) {
+          console.error("S3 upload failed:", err);
+          return null;
+        }
+      })
+    );
 
-    // Geocode address
+    const photoUrls: string[] = uploadedUrls.filter((url): url is string => !!url);
+
+    // ✅ Geocode
     let longitude = 0;
     let latitude = 0;
     try {
@@ -217,26 +203,28 @@ const photoUrls: string[] = uploadedUrls.filter(
       console.warn("Geocoding failed:", geoErr);
     }
 
-    // Create location
+    // ✅ Create location
     const [location] = await prisma.$queryRaw<any[]>`
       INSERT INTO "Location" (address, city, state, country, "postalCode", coordinates)
       VALUES (${address}, ${city}, ${state}, ${country}, ${postalCode}, ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326))
       RETURNING id, address, city, state, country, "postalCode", ST_AsText(coordinates) as coordinates;
     `;
 
-    // Create property
+    // ✅ Create property
     const newProperty = await prisma.property.create({
       data: {
         ...propertyData,
-        photoUrls: photoUrls.filter(Boolean), // remove failed uploads
+        photoUrls,
         locationId: location.id,
         managerCognitoId,
-        amenities: typeof propertyData.amenities === "string"
-          ? propertyData.amenities.split(",").map((a: string) => a.trim())
-          : [],
-        highlights: typeof propertyData.highlights === "string"
-          ? propertyData.highlights.split(",").map((h: string) => h.trim())
-          : [],
+        amenities:
+          typeof propertyData.amenities === "string"
+            ? propertyData.amenities.split(",").map((a: string) => a.trim())
+            : [],
+        highlights:
+          typeof propertyData.highlights === "string"
+            ? propertyData.highlights.split(",").map((h: string) => h.trim())
+            : [],
         isPetsAllowed: propertyData.isPetsAllowed === "true",
         isParkingIncluded: propertyData.isParkingIncluded === "true",
         pricePerMonth: parseFloat(propertyData.pricePerMonth),
@@ -251,9 +239,7 @@ const photoUrls: string[] = uploadedUrls.filter(
 
     res.status(201).json(newProperty);
   } catch (err: any) {
+    console.error("Error creating property:", err);
     res.status(500).json({ message: `Error creating property: ${err.message}` });
   }
 };
-
-
-
