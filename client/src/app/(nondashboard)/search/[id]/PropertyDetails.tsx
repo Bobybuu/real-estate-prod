@@ -19,8 +19,44 @@ const PropertyDetails = ({ propertyId }: PropertyDetailsProps) => {
 
   return (
     <div className="mb-6">
+      {/* Photos / Gallery */}
+      <div className="mt-8">
+        <h2 className="text-xl font-semibold my-3">Photos</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          {property.photoUrls?.map((photo: string, index: number) => (
+            <div key={index} className="relative group">
+              <img
+                src={photo} // Public S3 URL
+                alt={`Property Photo ${index + 1}`}
+                className="rounded-xl w-full h-56 object-cover shadow-md"
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Location */}
+      <div className="mt-8">
+        <h2 className="text-xl font-semibold my-3">Location</h2>
+        <p className="text-gray-700">
+          {property.location?.address}, {property.location?.city},{" "}
+          {property.location?.state}
+        </p>
+
+        {/* Optional Map preview */}
+        {property.location?.coordinates?.latitude &&
+          property.location?.coordinates?.longitude && (
+            <iframe
+              className="mt-4 rounded-xl w-full h-64"
+              src={`https://www.google.com/maps?q=${property.location.coordinates.latitude},${property.location.coordinates.longitude}&hl=es;z=14&output=embed`}
+              allowFullScreen
+              loading="lazy"
+            />
+          )}
+      </div>
+
       {/* Amenities */}
-      <div>
+      <div className="mt-8">
         <h2 className="text-xl font-semibold my-3">Property Amenities</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
           {property.amenities.map((amenity: AmenityEnum) => {
