@@ -46,7 +46,7 @@ const NewProperty = () => {
 
     const formData = new FormData();
     Object.entries(data).forEach(([key, value]) => {
-      if (key === "photoUrls") {
+      if (key === "photos") {
         const files = value as File[];
         files.forEach((file: File) => {
           formData.append("photos", file);
