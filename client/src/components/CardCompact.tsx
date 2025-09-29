@@ -11,7 +11,7 @@ const CardCompact = ({
   propertyLink,
 }: CardCompactProps) => {
   const [imgSrc, setImgSrc] = useState(
-    property.photoUrls?.[0] || "/placeholder.jpg"
+    property.photoUrls?.[0]
   );
 
   return (

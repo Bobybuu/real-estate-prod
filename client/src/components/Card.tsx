@@ -1,113 +1,107 @@
-"use client";
-
-import { useState } from "react";
+import { Bath, Bed, Heart, House, Star } from "lucide-react";
 import Image from "next/image";
-import { Heart, Star, MapPin, Car, PawPrint } from "lucide-react";
+import Link from "next/link";
+import React, { useState } from "react";
 
-type Property = {
-  id: string;
-  name: string;
-  location: string;
-  price: number;
-  bedrooms: number;
-  bathrooms: number;
-  area: number;
-  photoUrls?: string[];
-  rating?: number;
-  reviews?: number;
-  petsAllowed?: boolean;
-  parkingAvailable?: boolean;
-};
-
-type CardProps = {
-  property: Property;
-};
-
-export default function Card({ property }: CardProps) {
-  const [isFavorite, setIsFavorite] = useState(false);
-  const [loaded, setLoaded] = useState(false);
-
-  const images = property.photoUrls?.slice(0, 3) ?? ["/placeholder.jpg"];
+const Card = ({
+  property,
+  isFavorite,
+  onFavoriteToggle,
+  showFavoriteButton = true,
+  propertyLink,
+}: CardProps) => {
+  const [imgSrc, setImgSrc] = useState(
+    property.photoUrls?.[0] || "/placeholder.jpg"
+  );
 
   return (
-    <div className="rounded-2xl border shadow-sm overflow-hidden hover:shadow-lg transition">
-      {/* Image Collage */}
-      <div className="grid grid-cols-2 gap-1 h-48 relative">
-        {images.map((url, i) => (
-          <div
-            key={i}
-            className={`relative ${i === 0 ? "col-span-2 row-span-2" : ""}`}
-          >
-            {!loaded && (
-              <div className="absolute inset-0 bg-gray-200 animate-pulse rounded" />
-            )}
-            <Image
-              src={url}
-              alt={`${property.name} ${i + 1}`}
-              fill
-              className={`object-cover ${loaded ? "opacity-100" : "opacity-0"}`}
-              unoptimized // better for S3 URLs
-              onLoad={() => setLoaded(true)}
-              onError={(e) => (e.currentTarget.src = "/placeholder.jpg")}
-            />
-          </div>
-        ))}
-
-        {/* Favorite button */}
-        <button
-          onClick={() => setIsFavorite(!isFavorite)}
-          aria-label={
-            isFavorite ? "Remove from favorites" : "Add to favorites"
-          }
-          className="absolute top-3 right-3 p-2 rounded-full bg-white/80 hover:bg-white transition"
-        >
-          <Heart
-            className={`w-5 h-5 ${
-              isFavorite ? "fill-red-500 text-red-500" : "text-gray-600"
-            }`}
+    <div className="bg-white rounded-xl overflow-hidden shadow-lg w-full mb-5">
+      <div className="relative">
+        <div className="w-full h-48 relative">
+          <Image
+            src={imgSrc}
+            alt={property.name}
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            onError={() => setImgSrc("/placeholder.jpg")}
           />
-        </button>
-      </div>
-
-      {/* Property Info */}
-      <div className="p-4 space-y-2">
-        <h3 className="text-lg font-semibold">{property.name}</h3>
-        <p className="flex items-center text-sm text-gray-600">
-          <MapPin className="w-4 h-4 mr-1" /> {property.location}
-        </p>
-
-        <p className="text-xl font-bold text-blue-600">
-          ${property.price.toLocaleString()}
-        </p>
-
-        <div className="flex justify-between text-sm text-gray-700">
-          <span>{property.bedrooms} Beds</span>
-          <span>{property.bathrooms} Baths</span>
-          <span>{property.area} sqft</span>
         </div>
-
-        {/* Rating */}
-        {property.rating && (
-          <div className="flex items-center text-sm text-gray-600">
-            <Star className="w-4 h-4 text-yellow-500 mr-1" />
-            {property.rating} ({property.reviews} reviews)
-          </div>
+        <div className="absolute bottom-4 left-4 flex gap-2">
+          {property.isPetsAllowed && (
+            <span className="bg-white/80 text-black text-xs font-semibold px-2 py-1 rounded-full">
+              Pets Allowed
+            </span>
+          )}
+          {property.isParkingIncluded && (
+            <span className="bg-white/80 text-black text-xs font-semibold px-2 py-1 rounded-full">
+              Parking Included
+            </span>
+          )}
+        </div>
+        {showFavoriteButton && (
+          <button
+            className="absolute bottom-4 right-4 bg-white hover:bg-white/90 rounded-full p-2 cursor-pointer"
+            onClick={onFavoriteToggle}
+          >
+            <Heart
+              className={`w-5 h-5 ${
+                isFavorite ? "text-red-500 fill-red-500" : "text-gray-600"
+              }`}
+            />
+          </button>
         )}
-
-        {/* Badges */}
-        <div className="flex gap-2 mt-2">
-          {property.petsAllowed && (
-            <span className="flex items-center px-2 py-1 text-xs bg-green-100 text-green-600 rounded-full">
-              <PawPrint className="w-3 h-3 mr-1" /> Pets Allowed
-            </span>
+      </div>
+      <div className="p-4">
+        <h2 className="text-xl font-bold mb-1">
+          {propertyLink ? (
+            <Link
+              href={propertyLink}
+              className="hover:underline hover:text-blue-600"
+              scroll={false}
+            >
+              {property.name}
+            </Link>
+          ) : (
+            property.name
           )}
-          {property.parkingAvailable && (
-            <span className="flex items-center px-2 py-1 text-xs bg-blue-100 text-blue-600 rounded-full">
-              <Car className="w-3 h-3 mr-1" /> Parking
+        </h2>
+        <p className="text-gray-600 mb-2">
+          {property?.location?.address}, {property?.location?.city}
+        </p>
+        <div className="flex justify-between items-center">
+          <div className="flex items-center mb-2">
+            <Star className="w-4 h-4 text-yellow-400 mr-1" />
+            <span className="font-semibold">
+              {property.averageRating.toFixed(1)}
             </span>
-          )}
+            <span className="text-gray-600 ml-1">
+              ({property.numberOfReviews} Reviews)
+            </span>
+          </div>
+          <p className="text-lg font-bold mb-3">
+            ${property.pricePerMonth.toFixed(0)}{" "}
+            <span className="text-gray-600 text-base font-normal"> /month</span>
+          </p>
+        </div>
+        <hr />
+        <div className="flex justify-between items-center gap-4 text-gray-600 mt-5">
+          <span className="flex items-center">
+            <Bed className="w-5 h-5 mr-2" />
+            {property.beds} Bed
+          </span>
+          <span className="flex items-center">
+            <Bath className="w-5 h-5 mr-2" />
+            {property.baths} Bath
+          </span>
+          <span className="flex items-center">
+            <House className="w-5 h-5 mr-2" />
+            {property.squareFeet} sq ft
+          </span>
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default Card;
