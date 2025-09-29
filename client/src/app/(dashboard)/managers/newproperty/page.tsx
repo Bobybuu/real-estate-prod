@@ -194,7 +194,7 @@ const NewProperty = () => {
             <div>
               <h2 className="text-lg font-semibold mb-4">Photos</h2>
               <CustomFormField
-                name="photoUrls"
+                name="photos"
                 label="Property Photos"
                 type="file"
                 accept="image/*"
