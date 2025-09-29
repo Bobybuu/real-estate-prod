@@ -17,6 +17,10 @@ const baseConfig: NextConfig = {
         port: "",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "real-estate-photos-re.s3.us-east-2.amazonaws.com",
+      },
     ],
   },
 };
