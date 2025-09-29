@@ -46,7 +46,7 @@ const NewProperty = () => {
 
     const formData = new FormData();
     Object.entries(data).forEach(([key, value]) => {
-      if (key === "photos") {
+      if (key === "photoUrls") {
         const files = value as File[];
         files.forEach((file: File) => {
           formData.append("photos", file);
@@ -194,7 +194,7 @@ const NewProperty = () => {
             <div>
               <h2 className="text-lg font-semibold mb-4">Photos</h2>
               <CustomFormField
-                name="photos"
+                name="photoUrls"
                 label="Property Photos"
                 type="file"
                 accept="image/*"
