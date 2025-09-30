@@ -162,19 +162,20 @@ export const createProperty = async (req: Request, res: Response): Promise<void>
 
     // ✅ Upload photos to S3
     
+      const uploadedUrls = (
+        await Promise.all(
+          files.map(async (file) => {
+            try {
+              return await uploadToS3(file);
+            } catch (err) {
+              console.error("S3 upload failed:", err);
+              return null;
+            }
+          })
+        )
+      ).filter((url): url is string => url !== null); // keep only successful uploads
 
-    const uploadedUrls = await Promise.all(
-      files.map(async (file) => {
-        try {
-          return await uploadToS3(file);
-        } catch (err) {
-          console.error("S3 upload failed:", err);
-          return null;
-        }
-      })
-    );
-
-    const photoUrls: string[] = uploadedUrls.filter((url): url is string => !!url);
+    
 
     // ✅ Geocode
     let longitude = 0;
@@ -212,32 +213,33 @@ export const createProperty = async (req: Request, res: Response): Promise<void>
 
     // ✅ Create property
     const newProperty = await prisma.property.create({
-      data: {
-        ...propertyData,
-        photoUrls,
-        locationId: location.id,
-        managerCognitoId,
-        amenities:
-          typeof propertyData.amenities === "string"
-            ? propertyData.amenities.split(",").map((a: string) => a.trim())
-            : [],
-        highlights:
-          typeof propertyData.highlights === "string"
-            ? propertyData.highlights.split(",").map((h: string) => h.trim())
-            : [],
-        isPetsAllowed: propertyData.isPetsAllowed === "true",
-        isParkingIncluded: propertyData.isParkingIncluded === "true",
-        pricePerMonth: parseFloat(propertyData.pricePerMonth),
-        securityDeposit: parseFloat(propertyData.securityDeposit),
-        applicationFee: parseFloat(propertyData.applicationFee),
-        beds: parseInt(propertyData.beds),
-        baths: parseFloat(propertyData.baths),
-        squareFeet: parseInt(propertyData.squareFeet),
-      },
-      include: { location: true, manager: true },
-    });
+  data: {
+    ...propertyData,
+    photoUrls: uploadedUrls, // <-- use uploadedUrls, not photoUrls
+    locationId: location.id,
+    managerCognitoId,
+    amenities:
+      typeof propertyData.amenities === "string"
+        ? propertyData.amenities.split(",").map((a: string) => a.trim())
+        : [],
+    highlights:
+      typeof propertyData.highlights === "string"
+        ? propertyData.highlights.split(",").map((h: string) => h.trim())
+        : [],
+    isPetsAllowed: propertyData.isPetsAllowed === "true",
+    isParkingIncluded: propertyData.isParkingIncluded === "true",
+    pricePerMonth: parseFloat(propertyData.pricePerMonth),
+    securityDeposit: parseFloat(propertyData.securityDeposit),
+    applicationFee: parseFloat(propertyData.applicationFee),
+    beds: parseInt(propertyData.beds),
+    baths: parseFloat(propertyData.baths),
+    squareFeet: parseInt(propertyData.squareFeet),
+  },
+  include: { location: true, manager: true },
+});
 
-    res.status(201).json(newProperty);
+res.status(201).json(newProperty);
+
   } catch (err: any) {
     console.error("Error creating property:", err);
     res.status(500).json({ message: `Error creating property: ${err.message}` });
