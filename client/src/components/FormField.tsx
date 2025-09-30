@@ -128,60 +128,19 @@ export const CustomFormField: React.FC<FormFieldProps> = ({
             </FormLabel>
           </div>
         );
-      case "file":
-  return (
-    <FilePond
-      className={`${inputClassName}`}
-      allowMultiple={true}
-      labelIdle={`Drag & Drop your images or <span class="filepond--label-action">Browse</span>`}
-      credits={false}
-      server={{
-        process: async (fieldName, file, metadata, load, error, progress, abort) => {
-          try {
-            // 1. Ask backend for a signed URL
-            const res = await fetch(`/api/generate-upload-url?filename=${file.name}`);
-            if (!res.ok) {
-              throw new Error("Failed to get signed URL");
-            }
-            const { uploadUrl, key } = await res.json();
-
-            // 2. Upload file directly to S3
-            const xhr = new XMLHttpRequest();
-            xhr.open("PUT", uploadUrl, true);
-
-            xhr.upload.onprogress = (e) => {
-              progress(e.lengthComputable, e.loaded, e.total);
-            };
-
-            xhr.onload = () => {
-              if (xhr.status >= 200 && xhr.status < 300) {
-                load(key); // FilePond stores the S3 object key
-              } else {
-                error("Upload failed");
-              }
-            };
-
-            xhr.onerror = () => error("Upload error");
-            xhr.onabort = () => abort();
-
-            xhr.setRequestHeader("Content-Type", file.type);
-            xhr.send(file);
-
-            return { abort: () => xhr.abort() };
-          } catch (err) {
-            console.error("File upload error:", err);
-            error("Upload failed");
-            return { abort: () => {} };
-          }
-        },
-      }}
-      onupdatefiles={(fileItems) => {
-        // Save S3 keys instead of raw File objects
-        const keys = fileItems.map((fileItem: any) => fileItem.serverId);
-        field.onChange(keys);
-      }}
-    />
-  );
+        case "file":
+        return (
+          <FilePond
+            className={`${inputClassName}`}
+            onupdatefiles={(fileItems) => {
+              const files = fileItems.map((fileItem) => fileItem.file);
+              field.onChange(files);
+            }}
+            allowMultiple={true}
+            labelIdle={`Drag & Drop your images or <span class="filepond--label-action">Browse</span>`}
+            credits={false}
+          />
+        );
 
       case "number":
         return (
