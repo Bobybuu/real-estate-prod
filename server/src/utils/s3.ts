@@ -20,6 +20,7 @@ export const uploadToS3 = async (file: Express.Multer.File): Promise<string> => 
     Key: fileKey,
     Body: file.buffer,
     ContentType: file.mimetype,
+    ACL: "public-read",
   });
 
   await s3Client.send(command);
