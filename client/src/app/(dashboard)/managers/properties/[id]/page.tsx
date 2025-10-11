@@ -100,22 +100,20 @@ const PropertyTenants = () => {
                     <TableCell>
                       <div className="flex items-center space-x-3">
                         <Image
-                        src={property?.photoUrls?.[0] || "/fallback.jpg"}
-                        alt={property?.name || "Property photo"}
-                        width={300}
-                        height={200}
-                        className="rounded-lg object-cover"
+                          src={property?.photoUrls?.[0] || "/fallback.jpg"}
+                          alt={property?.name || "Property photo"}
+                          width={300}
+                          height={200}
+                          className="rounded-lg object-cover"
+                          priority
                         />
                         <div>
-                          <div className="font-semibold">
-                            {lease.tenant.name}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {lease.tenant.email}
-                          </div>
+                          <div className="font-semibold">{lease.tenant.name}</div>
+                          <div className="text-sm text-gray-500">{lease.tenant.email}</div>
                         </div>
                       </div>
                     </TableCell>
+
                     <TableCell>
                       <div>
                         {new Date(lease.startDate).toLocaleDateString()} -

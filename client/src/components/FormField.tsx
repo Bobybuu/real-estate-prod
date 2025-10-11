@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import {
   ControllerRenderProps,
@@ -24,11 +26,13 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Edit, X, Plus } from "lucide-react";
+
+// ✅ FilePond imports
 import { registerPlugin } from "filepond";
 import { FilePond } from "react-filepond";
-import "filepond/dist/filepond.min.css";
 import FilePondPluginImagePreview from "filepond-plugin-image-preview";
 import FilePondPluginImageExifOrientation from "filepond-plugin-image-exif-orientation";
+import "filepond/dist/filepond.min.css";
 import "filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css";
 
 registerPlugin(FilePondPluginImageExifOrientation, FilePondPluginImagePreview);
@@ -52,7 +56,6 @@ interface FormFieldProps {
   className?: string;
   labelClassName?: string;
   inputClassName?: string;
-  value?: string;
   disabled?: boolean;
   multiple?: boolean;
   isIcon?: boolean;
@@ -86,60 +89,60 @@ export const CustomFormField: React.FC<FormFieldProps> = ({
             placeholder={placeholder}
             {...field}
             rows={3}
-            className={`border-gray-200 p-4 ${inputClassName}`}
+            className={`border-gray-200 p-4 ${inputClassName || ""}`}
           />
         );
+
       case "select":
         return (
           <Select
-            value={field.value || (initialValue as string)}
-            defaultValue={field.value || (initialValue as string)}
+            value={field.value || ""}
             onValueChange={field.onChange}
           >
-            <SelectTrigger
-              className={`w-full border-gray-200 p-4 ${inputClassName}`}
-            >
+            <SelectTrigger className={`w-full border-gray-200 p-4 ${inputClassName || ""}`}>
               <SelectValue placeholder={placeholder} />
             </SelectTrigger>
             <SelectContent className="w-full border-gray-200 shadow">
               {options?.map((option) => (
-                <SelectItem
-                  key={option.value}
-                  value={option.value}
-                  className={`cursor-pointer hover:!bg-gray-100 hover:!text-customgreys-darkGrey`}
-                >
+                <SelectItem key={option.value} value={option.value}>
                   {option.label}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         );
+
       case "switch":
         return (
           <div className="flex items-center space-x-2">
             <Switch
-              checked={field.value}
+              checked={!!field.value}
               onCheckedChange={field.onChange}
               id={name}
-              className={`text-customgreys-dirtyGrey ${inputClassName}`}
             />
             <FormLabel htmlFor={name} className={labelClassName}>
               {label}
             </FormLabel>
           </div>
         );
-        case "file":
+
+      case "file":
         return (
-          <FilePond
-            className={`${inputClassName}`}
-            onupdatefiles={(fileItems) => {
-              const files = fileItems.map((fileItem) => fileItem.file);
-              field.onChange(files);
-            }}
-            allowMultiple={true}
-            labelIdle={`Drag & Drop your images or <span class="filepond--label-action">Browse</span>`}
-            credits={false}
-          />
+          <div className="space-y-2">
+            {label && <label className="block text-sm font-medium">{label}</label>}
+            <FilePond
+              allowMultiple={multiple}
+              acceptedFileTypes={accept ? [accept] : ["image/*"]}
+              onupdatefiles={(fileItems) => {
+                const files = fileItems.map((fileItem) => fileItem.file);
+                field.onChange(files); // ✅ sync with react-hook-form
+              }}
+              labelIdle={`Drag & Drop your images or <span class="filepond--label-action">Browse</span>`}
+              credits={false}
+              name={name}
+              className={inputClassName}
+            />
+          </div>
         );
 
       case "number":
@@ -148,10 +151,11 @@ export const CustomFormField: React.FC<FormFieldProps> = ({
             type="number"
             placeholder={placeholder}
             {...field}
-            className={`border-gray-200 p-4 ${inputClassName}`}
+            className={`border-gray-200 p-4 ${inputClassName || ""}`}
             disabled={disabled}
           />
         );
+
       case "multi-input":
         return (
           <MultiInputField
@@ -161,13 +165,14 @@ export const CustomFormField: React.FC<FormFieldProps> = ({
             inputClassName={inputClassName}
           />
         );
+
       default:
         return (
           <Input
             type={type}
             placeholder={placeholder}
             {...field}
-            className={`border-gray-200 p-4 ${inputClassName}`}
+            className={`border-gray-200 p-4 ${inputClassName || ""}`}
             disabled={disabled}
           />
         );
@@ -180,29 +185,19 @@ export const CustomFormField: React.FC<FormFieldProps> = ({
       name={name}
       defaultValue={initialValue}
       render={({ field }) => (
-        <FormItem
-          className={`${
-            type !== "switch" && "rounded-md"
-          } relative ${className}`}
-        >
+        <FormItem className={`${type !== "switch" && "rounded-md"} ${className || ""}`}>
           {type !== "switch" && (
-            <div className="flex justify-between items-center">
-              <FormLabel className={`text-sm ${labelClassName}`}>
-                {label}
-              </FormLabel>
-
-              {!disabled &&
-                isIcon &&
-                type !== "file" &&
-                type !== "multi-input" && (
-                  <Edit className="size-4 text-customgreys-dirtyGrey" />
-                )}
+            <div className="flex justify-between items-center mb-1">
+              <FormLabel className={`text-sm ${labelClassName || ""}`}>{label}</FormLabel>
+              {!disabled && isIcon && type !== "file" && (
+                <Edit className="size-4 text-gray-400" />
+              )}
             </div>
           )}
           <FormControl>
             {renderFormControl({
               ...field,
-              value: field.value !== undefined ? field.value : initialValue,
+              value: field.value ?? initialValue,
             })}
           </FormControl>
           <FormMessage className="text-red-400" />
@@ -211,6 +206,8 @@ export const CustomFormField: React.FC<FormFieldProps> = ({
     />
   );
 };
+
+// ✅ Multi-input helper component
 interface MultiInputFieldProps {
   name: string;
   control: any;
@@ -224,10 +221,7 @@ const MultiInputField: React.FC<MultiInputFieldProps> = ({
   placeholder,
   inputClassName,
 }) => {
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name,
-  });
+  const { fields, append, remove } = useFieldArray({ control, name });
 
   return (
     <div className="space-y-2">
@@ -241,7 +235,7 @@ const MultiInputField: React.FC<MultiInputFieldProps> = ({
                 <Input
                   {...field}
                   placeholder={placeholder}
-                  className={`flex-1 border-none bg-customgreys-darkGrey p-4 ${inputClassName}`}
+                  className={`flex-1 border-gray-200 p-4 ${inputClassName || ""}`}
                 />
               </FormControl>
             )}
@@ -251,9 +245,8 @@ const MultiInputField: React.FC<MultiInputFieldProps> = ({
             onClick={() => remove(index)}
             variant="ghost"
             size="icon"
-            className="text-customgreys-dirtyGrey"
           >
-            <X className="w-4 h-4" />
+            <X className="w-4 h-4 text-gray-500" />
           </Button>
         </div>
       ))}
@@ -262,10 +255,8 @@ const MultiInputField: React.FC<MultiInputFieldProps> = ({
         onClick={() => append("")}
         variant="outline"
         size="sm"
-        className="mt-2 text-customgreys-dirtyGrey"
       >
-        <Plus className="w-4 h-4 mr-2" />
-        Add Item
+        <Plus className="w-4 h-4 mr-2" /> Add Item
       </Button>
     </div>
   );

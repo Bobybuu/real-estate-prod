@@ -26,6 +26,7 @@ const PropertyDetails = ({ propertyId }: PropertyDetailsProps) => {
           {property.photoUrls?.map((photo: string, index: number) => (
             <div key={index} className="relative group">
               <img
+                key={index}
                 src={photo} // Public S3 URL
                 alt={`Property Photo ${index + 1}`}
                 className="rounded-xl w-full h-56 object-cover shadow-md"
