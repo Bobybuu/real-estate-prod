@@ -1,137 +1,32 @@
 "use client";
 
 import React from "react";
-import { Controller, useFormContext } from "react-hook-form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FilePond } from "react-filepond";
-import "filepond/dist/filepond.min.css";
+import { useForm, FormProvider } from "react-hook-form";
+import { CustomFormField } from "@/components/CustomFormField";
 
-interface CustomFormFieldProps {
-  name: string;
-  label?: string;
-  type?: "text" | "number" | "textarea" | "switch" | "select" | "file";
-  options?: { value: string; label: string }[];
-  accept?: string;
-  className?: string;
-  inputClassName?: string;
-}
+const NewPropertyPage = () => {
+  const methods = useForm();
 
-export const CustomFormField: React.FC<CustomFormFieldProps> = ({
-  name,
-  label,
-  type = "text",
-  options = [],
-  accept,
-  className,
-  inputClassName,
-}) => {
-  const form = useFormContext();
+  const onSubmit = (data: any) => {
+    console.log("Form submitted:", data);
+  };
 
   return (
-    <div className={`space-y-2 ${className || ""}`}>
-      <Controller
-        name={name}
-        control={form.control}
-        render={({ field, fieldState }) => {
-          switch (type) {
-            case "textarea":
-              return (
-                <div>
-                  {label && <label className="block text-sm font-medium">{label}</label>}
-                  <Textarea {...field} className={inputClassName} />
-                  {fieldState.error && (
-                    <p className="text-red-500 text-sm">{fieldState.error.message}</p>
-                  )}
-                </div>
-              );
-
-            case "number":
-            case "text":
-              return (
-                <div>
-                  {label && <label className="block text-sm font-medium">{label}</label>}
-                  <Input
-                    type={type}
-                    {...field}
-                    value={field.value ?? ""}
-                    className={inputClassName}
-                  />
-                  {fieldState.error && (
-                    <p className="text-red-500 text-sm">{fieldState.error.message}</p>
-                  )}
-                </div>
-              );
-
-            case "switch":
-              return (
-                <div className="flex items-center justify-between">
-                  {label && <label className="text-sm font-medium">{label}</label>}
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                    className={inputClassName}
-                  />
-                  {fieldState.error && (
-                    <p className="text-red-500 text-sm">{fieldState.error.message}</p>
-                  )}
-                </div>
-              );
-
-            case "select":
-              return (
-                <div>
-                  {label && <label className="block text-sm font-medium">{label}</label>}
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value ?? ""}
-                  >
-                    <SelectTrigger className={inputClassName}>
-                      <SelectValue placeholder="Select an option" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {options.map((opt) => (
-                        <SelectItem key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {fieldState.error && (
-                    <p className="text-red-500 text-sm">{fieldState.error.message}</p>
-                  )}
-                </div>
-              );
-
-            case "file":
-              return (
-                <div>
-                  {label && <label className="block text-sm font-medium">{label}</label>}
-                  <FilePond
-                    allowMultiple={true}
-                    acceptedFileTypes={accept ? [accept] : ["image/*"]}
-                    className={inputClassName}
-                    onupdatefiles={(fileItems) => {
-                      const files = fileItems.map((fileItem) => fileItem.file);
-                      field.onChange(files);
-                    }}
-                    labelIdle={`Drag & Drop your images or <span class="filepond--label-action">Browse</span>`}
-                    credits={false}
-                    name={name}
-                  />
-                  {fieldState.error && (
-                    <p className="text-red-500 text-sm">{fieldState.error.message}</p>
-                  )}
-                </div>
-              );
-
-            default:
-              return <></>;
-          }
-        }}
-      />
-    </div>
+    <FormProvider {...methods}>
+      <div className="p-8">
+        <h1 className="text-2xl font-bold mb-6">Add New Property</h1>
+        <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-4">
+          <CustomFormField name="name" label="Property Name" />
+          <CustomFormField name="price" label="Price" type="number" />
+          <CustomFormField name="description" label="Description" type="textarea" />
+          <CustomFormField name="photos" label="Property Photos" type="file" accept="image/*" />
+          <button type="submit" className="bg-primary-700 text-white px-4 py-2 rounded">
+            Submit
+          </button>
+        </form>
+      </div>
+    </FormProvider>
   );
 };
+
+export default NewPropertyPage;
